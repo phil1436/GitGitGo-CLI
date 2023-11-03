@@ -1,39 +1,94 @@
 package main
 
 import (
-	"flag"
+	"GitGitGo-CLI/cmdtool"
+	"GitGitGo-CLI/subcommands"
 	"fmt"
 	"os"
+	"strings"
 )
 
+const VERSION = "0.0.1"
+
+var sbCmds []*cmdtool.Subcommand
+var globalFlags *cmdtool.FlagSet = cmdtool.NewFlagSet()
+
 func main() {
-	// check if the user provided a subcommand
+
+	sbCmds = append(sbCmds, cmdtool.NewSubcommand([]string{"version", "-v"}, "Get the current version", PrintVersion))
+	sbCmds = append(sbCmds, cmdtool.NewSubcommand([]string{"help", "-h"}, "Help command", globalHelp))
+
+	initCommand := cmdtool.NewSubcommand([]string{"init", "i"}, "Init command", subcommands.Init)
+
+	addCommand := cmdtool.NewSubcommand([]string{"add", "a"}, "Add command", subcommands.Add)
+
+	destinationFlag := &cmdtool.Flag{
+		Name:        []string{"destination", "d"},
+		Description: "<path> Destination directory",
+		Value:       ".",
+	}
+
+	fileFlag := &cmdtool.Flag{
+		Name:        []string{"file", "f"},
+		Description: "<filename> The file to add. Required for the add command",
+		Value:       nil,
+	}
+
+	initCommand.AddFlag(destinationFlag)
+	addCommand.AddFlag(destinationFlag)
+	addCommand.AddFlag(fileFlag)
+
+	sbCmds = append(sbCmds, initCommand)
+	sbCmds = append(sbCmds, addCommand)
+
+	activeSCmd := getActiveSubcommand()
+
+	if activeSCmd == nil {
+		globalHelp(nil)
+		return
+	}
+
+	var msg string
+	if !activeSCmd.Run(os.Args[2:], globalFlags, &msg) {
+		fmt.Println("Could not execute command " + activeSCmd.Names[0] + ":")
+		fmt.Println(msg)
+	}
+
+}
+
+func getActiveSubcommand() *cmdtool.Subcommand {
+	// Get the subcommand name
 	if len(os.Args) < 2 {
-		fmt.Println("install subcommand is required")
-		os.Exit(1)
+		return nil
 	}
 
-	// create a new flag set for the install subcommand
-	installCommand := flag.NewFlagSet("install", flag.ExitOnError)
-	testCommand := flag.NewFlagSet("test", flag.ExitOnError)
-	fmt.Println(installCommand.Args())
-	fmt.Println(testCommand.Args())
-	// parse the flags for the install flag set
-	installCommand.Parse(os.Args[2:])
-	testCommand.Parse(os.Args[2:])
-	// check if the install flag set was parsed
-	if installCommand.Parsed() {
-		hallo()
+	for _, sb := range sbCmds {
+		for _, name := range sb.Names {
+			if strings.EqualFold(name, os.Args[1]) {
+				return sb
+			}
+		}
 	}
-	if testCommand.Parsed() {
-		hallo2()
-	}
-
+	return nil
 }
 
-func hallo() {
-	fmt.Println("install!")
+func globalHelp(fs *cmdtool.FlagSet) {
+	fmt.Println("GitGitGo-CLI - A CLI tool for Git written in Go")
+	fmt.Println("Usage: gitgitgo [command] [flags]")
+
+	fmt.Println("Commands:")
+	for _, sb := range sbCmds {
+		fmt.Println(sb.ToString())
+	}
 }
-func hallo2() {
-	fmt.Println("test!")
+
+func PrintVersion(fs *cmdtool.FlagSet) {
+	fmt.Printf("GitGitGo-CLI version %s\n\nby Philipp B.", VERSION)
 }
+
+/* func log(msg string) {
+	if quietly {
+		return
+	}
+	fmt.Println(msg)
+} */
