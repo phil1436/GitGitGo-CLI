@@ -11,11 +11,11 @@ package cmdtool
 type Subcommand struct {
 	Names       []string
 	Description string
-	Handler     func(fs *FlagSet)
+	Handler     func(fs *FlagSet) bool
 	FlagSet     *FlagSet
 }
 
-func NewSubcommand(names []string, description string, handler func(fs *FlagSet)) *Subcommand {
+func NewSubcommand(names []string, description string, handler func(fs *FlagSet) bool) *Subcommand {
 	return &Subcommand{
 		Names:       names,
 		Description: description,
@@ -41,8 +41,7 @@ func (s *Subcommand) Run(args []string, fs *FlagSet, msg *string) bool {
 		}
 		x = s.FlagSet.Concat(fs)
 	}
-	s.Handler(x)
-	return true
+	return s.Handler(x)
 }
 
 func (s *Subcommand) ToString() string {

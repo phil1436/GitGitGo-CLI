@@ -7,9 +7,16 @@ import (
 )
 
 // Add a specified file to your project
-func Add(fs *cmdtool.FlagSet) bool {
-	fmt.Println("gitgitgo add")
+func Print(fs *cmdtool.FlagSet) bool {
+	fmt.Println("gitgitgo print")
 	fmt.Println(fs.GetStateString())
+
+	if fs.GetValue("file") == "" {
+		for _, file := range utils.GetAllFiles(utils.GITHUBNAME) {
+			fmt.Println(file.ToString(fs.GetValue("name").(bool)))
+		}
+		return true
+	}
 
 	file := utils.GetFile(fs.GetValue("file").(string), utils.GITHUBNAME)
 	if file == nil {
@@ -17,5 +24,7 @@ func Add(fs *cmdtool.FlagSet) bool {
 		return false
 	}
 
-	return file.Save(fs.GetValue("destination").(string), utils.GITHUBNAME, utils.FULLNAME, utils.REPONAME)
+	fmt.Println(file.ToString(fs.GetValue("name").(bool)))
+
+	return true
 }

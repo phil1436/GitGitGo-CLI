@@ -4,6 +4,7 @@ type Flag struct {
 	Name        []string
 	Description string
 	Value       interface{}
+	BoolFlag    bool
 }
 
 func (f *Flag) ToString() string {
@@ -12,7 +13,6 @@ func (f *Flag) ToString() string {
 		result += "-" + f.Name[0]
 	} else {
 		result += "[-" + f.Name[0]
-		//iterate over the rest of the names
 		i := 1
 		for i < len(f.Name) {
 			result += "|-" + f.Name[i]
@@ -21,5 +21,9 @@ func (f *Flag) ToString() string {
 		result += "]"
 	}
 
-	return result + " " + f.Description
+	result = result + " " + f.Description
+	if f.Value != nil {
+		result += " (optional)"
+	}
+	return result
 }
