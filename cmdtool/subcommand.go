@@ -28,15 +28,15 @@ func (s *Subcommand) AddFlag(flag *Flag) {
 	s.FlagSet.AddFlag(flag)
 }
 
-func (s *Subcommand) Run(args []string, fs *FlagSet, msg *string) bool {
+func (s *Subcommand) Run(args []string, fs *FlagSet) bool {
 	s.FlagSet.Parse(args)
-	if !s.FlagSet.IsFullFilled(msg) {
+	if !s.FlagSet.IsFullFilled() {
 		return false
 	}
 	x := s.FlagSet
 	if fs != nil {
 		fs.Parse(args)
-		if !fs.IsFullFilled(msg) {
+		if !fs.IsFullFilled() {
 			return false
 		}
 		x = s.FlagSet.Concat(fs)

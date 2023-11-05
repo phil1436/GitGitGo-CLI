@@ -2,6 +2,7 @@ package cmdtool
 
 import (
 	"fmt"
+	"phil1436/GitGitGo-CLI/logger"
 	"strings"
 )
 
@@ -31,6 +32,17 @@ func (fs *FlagSet) GetValue(name string) interface{} {
 	}
 	return nil
 }
+
+/* func (fs *FlagSet) GetStringValue(name string) interface{} {
+	for _, flag := range fs.Flags {
+		for _, n := range flag.Name {
+			if n == name {
+				return flag.Value.(string)
+			}
+		}
+	}
+	return nil
+} */
 
 // Check if a flag with the given name is defined
 func (fs *FlagSet) IsDefined(name string) bool {
@@ -68,11 +80,10 @@ func (fs *FlagSet) Parse(args []string) {
 }
 
 // Check if all required flags are set
-func (fs *FlagSet) IsFullFilled(msg *string) bool {
+func (fs *FlagSet) IsFullFilled() bool {
 	for _, flag := range fs.Flags {
 		if flag.Value == nil {
-
-			*msg = "Flag '-" + flag.Name[0] + "' is required"
+			logger.AddError("Flag '-" + flag.Name[0] + "' is required")
 			return false
 		}
 	}
@@ -102,14 +113,30 @@ func (fs *FlagSet) ToString() string {
 
 // Convert the FlagSet to a string with the current values
 func (fs *FlagSet) GetStateString() string {
-	result := ""
-	for _, flag := range fs.Flags {
-		result += flag.Name[0] + ": " + fmt.Sprintf("%v", flag.Value) + "\n"
+	if fs.IsEmpty() {
+		return ""
 	}
-	return result
+	result := "["
+	for _, flag := range fs.Flags {
+		if flag.Value == nil || flag.Value == "" || flag.Value == false {
+			continue
+		}
+		result += flag.Name[0] + ": " + fmt.Sprintf("%v", flag.Value) + " | "
+	}
+	// remove last two characters
+	result = result[:len(result)-3]
+	return result + "]\n"
 }
 
 // Check if the FlagSet is empty
 func (fs *FlagSet) IsEmpty() bool {
 	return len(fs.Flags) == 0
+}
+
+func (fs *FlagSet) Copy() *FlagSet {
+	newFlags := make([]*Flag, len(fs.Flags))
+	copy(newFlags, fs.Flags)
+	return &FlagSet{
+		Flags: newFlags,
+	}
 }

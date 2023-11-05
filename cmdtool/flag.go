@@ -7,6 +7,17 @@ type Flag struct {
 	BoolFlag    bool
 }
 
+func (f *Flag) Copy() *Flag {
+	result := &Flag{
+		Name:        make([]string, len(f.Name)),
+		Description: f.Description,
+		Value:       f.Value,
+		BoolFlag:    f.BoolFlag,
+	}
+	copy(result.Name, f.Name)
+	return result
+}
+
 func (f *Flag) ToString() string {
 	result := "   "
 	if len(f.Name) == 1 {

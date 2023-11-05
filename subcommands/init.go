@@ -1,26 +1,35 @@
 package subcommands
 
 import (
-	"fmt"
 	"phil1436/GitGitGo-CLI/cmdtool"
+	"phil1436/GitGitGo-CLI/logger"
 	"phil1436/GitGitGo-CLI/utils"
 )
 
 func Init(fs *cmdtool.FlagSet) bool {
-	fmt.Println("gitgitgo init")
-	fmt.Println(fs.GetStateString())
+	logger.Log("*** GitGitGo INIT ***\n")
+	logger.Log(fs.GetStateString())
 
-	for _, file := range utils.GetAllFiles(utils.GITHUBNAME) {
+	if fs.GetValue("dryrun").(bool) {
+		logger.Log("DRYRUN: No files will be created\n")
+	}
+
+	result := true
+
+	files := utils.GetAllFiles()
+	if files == nil {
+		return false
+	}
+
+	for _, file := range files {
 		if !file.OnInit {
 			continue
 		}
-		if !file.Save(fs.GetValue("destination").(string), utils.GITHUBNAME, utils.FULLNAME, utils.REPONAME) {
-			fmt.Println("File '" + file.Name + "' could not be created")
-			return false
+		if !file.Save(fs.GetValue("destination").(string), utils.GITHUBNAME, utils.FULLNAME, utils.REPONAME, "", fs.GetValue("force").(bool), fs.GetValue("dryrun").(bool)) {
+			result = false
+			continue
 		}
-		fmt.Println("File '" + file.Name + "' created...")
-
 	}
 
-	return true
+	return result
 }

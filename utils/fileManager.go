@@ -2,24 +2,24 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
+	"phil1436/GitGitGo-CLI/logger"
 	"strings"
 )
 
 var initilized = false
 var files = make(map[string]*File)
 
-func GetFile(fileName string, gName string) *File {
-	if !Init(gName) {
+func GetFile(fileName string) *File {
+	if !Init() {
 		return nil
 	}
 	return files[fileName]
 }
 
-func GetAllFiles(gName string) []*File {
-	if !Init(gName) {
+func GetAllFiles() []*File {
+	if !Init() {
 		return nil
 	}
 	var filesArr []*File
@@ -33,13 +33,13 @@ func AddFile(file *File) {
 	files[file.Name] = file
 }
 
-func Init(s string) bool {
+func Init() bool {
 	if initilized {
 		return true
 	}
 
 	initilized = true
-	resp, err := http.Get("https://api.github.com/users/" + s + "/repos")
+	resp, err := http.Get("https://api.github.com/users/" + OWNER + "/repos")
 
 	check(err)
 
@@ -56,12 +56,12 @@ func Init(s string) bool {
 	for _, repo := range repos {
 		name := repo["name"].(string)
 		if strings.ToLower(name) == ".gitgitgo" {
-			fileUrl = "https://raw.githubusercontent.com/" + s + "/.gitgitgo/" + repo["default_branch"].(string) + "/files.json"
+			fileUrl = "https://raw.githubusercontent.com/" + OWNER + "/.gitgitgo/" + repo["default_branch"].(string) + "/files.json"
 			break
 		}
 	}
 	if fileUrl == "" {
-		fmt.Println("No .gitgitgo repo found")
+		logger.AddError("No .gitgitgo repo found for owner '" + OWNER + "'")
 		return false
 	}
 
