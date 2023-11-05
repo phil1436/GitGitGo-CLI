@@ -2,7 +2,7 @@ package cmdtool
 
 import (
 	"fmt"
-	"phil1436/GitGitGo-CLI/src/logger"
+	"phil1436/GitGitGo-CLI/pkg/logger"
 	"strings"
 )
 
