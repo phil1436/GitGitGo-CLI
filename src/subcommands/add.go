@@ -2,9 +2,9 @@ package subcommands
 
 import (
 	"path/filepath"
-	"phil1436/GitGitGo-CLI/cmdtool"
-	"phil1436/GitGitGo-CLI/logger"
-	"phil1436/GitGitGo-CLI/utils"
+	"phil1436/GitGitGo-CLI/src/cmdtool"
+	"phil1436/GitGitGo-CLI/src/logger"
+	"phil1436/GitGitGo-CLI/src/utils"
 )
 
 // Add a specified file to your project

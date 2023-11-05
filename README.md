@@ -3,7 +3,7 @@
   <img src="assets/logo.png" alt="GitGitGo-CLILogo" width="30%"/>
   <h1>GitGitGo-CLI</h1>
   <p>
-     A Command Line Interface for GitGitGo
+     GitGitGo-CLI is a CLI tool to help you manage your git repositories.
   </p>
 </div>
 
@@ -38,9 +38,9 @@
 
 ## [Release Notes](https://github.com/phil1436/GitGitGo-CLI/blob/main/CHANGELOG.md)
 
-### [v0.0.1](https://github.com/phil1436/GitGitGo-CLI/tree/0.0.1)
+<!-- ### [v0.0.1](https://github.com/phil1436/GitGitGo-CLI/tree/0.0.1)
 
--   _Initial release_
+-   _Initial release_ -->
 
 ---
 

@@ -1,9 +1,9 @@
 package subcommands
 
 import (
-	"phil1436/GitGitGo-CLI/cmdtool"
-	"phil1436/GitGitGo-CLI/logger"
-	"phil1436/GitGitGo-CLI/utils"
+	"phil1436/GitGitGo-CLI/src/cmdtool"
+	"phil1436/GitGitGo-CLI/src/logger"
+	"phil1436/GitGitGo-CLI/src/utils"
 )
 
 func Init(fs *cmdtool.FlagSet) bool {
