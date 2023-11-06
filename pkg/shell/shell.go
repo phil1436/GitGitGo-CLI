@@ -25,7 +25,7 @@ func Start() bool {
 func MainLoop() bool {
 	for running {
 
-		fmt.Print("gitgitgo> ")
+		fmt.Print("gitgitgo>")
 
 		in := bufio.NewReader(os.Stdin)
 
@@ -88,7 +88,7 @@ func AddShellCommands() {
 			logger.AddErrObj("Error while getting working directory", err)
 			return false
 		}
-		if attValue != nil {
+		if attValue[0] != nil {
 			err := os.Chdir(attValue[0].(string))
 			if err != nil {
 				logger.AddErrObj("Error while changing directory", err)

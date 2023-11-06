@@ -166,11 +166,18 @@ func InitCommands() {
 		Description: "<name>: Change the repo name that will be used",
 		Value:       "",
 	}
+	devFlag := &cmdtool.Flag{
+		Name:        []string{"dev"},
+		Description: ": Run in dev mode [internal use only]",
+		Value:       false,
+		BoolFlag:    true,
+	}
 
 	compiler.AddGlobalFlag(quietFlag)
 	compiler.AddGlobalFlag(providerFlag)
 	compiler.AddGlobalFlag(githubnameFlag)
 	compiler.AddGlobalFlag(fullnameFlag)
 	compiler.AddGlobalFlag(reponameFlag)
+	compiler.AddGlobalFlag(devFlag)
 
 }

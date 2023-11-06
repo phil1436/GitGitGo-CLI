@@ -4,10 +4,9 @@ import "strings"
 
 const VERSION = "0.0.1"
 
-var PROVIDER = "phil1436"
-var GITHUBNAME = "phil1436"
-var FULLNAME = "Philipp B."
-
+var PROVIDER = ""
+var GITHUBNAME = ""
+var FULLNAME = ""
 var REPONAME = ""
 
 func IsProviderVarName(name string) bool {

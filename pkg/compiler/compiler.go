@@ -60,14 +60,23 @@ func ExecuteLine(line string) bool {
 
 // BeforeRun is called before the subcommand is executed
 func BeforeRun(globalFlags *cmdtool.FlagSet) {
+
+	if globalFlags.GetValue("dev").(bool) {
+		// run in dev mode
+		ExecuteLine("run setvalues.ggg")
+	}
+
 	if globalFlags.GetValue("quiet").(bool) {
 		logger.Quiet()
+	} else {
+		logger.Unquiet()
 	}
+
 	if globalFlags.GetValue("provider").(string) != "" {
 		newprovider := globalFlags.GetValue("provider").(string)
 		if newprovider != utils.PROVIDER {
 			utils.PROVIDER = newprovider
-			fmt.Println("Changed provider to '" + newprovider + "'")
+			logger.Log("Changed provider to '" + newprovider + "'")
 			utils.ReloadFileManager()
 		}
 	}
@@ -80,6 +89,7 @@ func BeforeRun(globalFlags *cmdtool.FlagSet) {
 	if globalFlags.GetValue("reponame").(string) != "" {
 		utils.REPONAME = globalFlags.GetValue("reponame").(string)
 	}
+
 }
 
 // GetActiveSubcommand returns the active subcommand

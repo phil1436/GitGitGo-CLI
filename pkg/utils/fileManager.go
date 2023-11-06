@@ -104,6 +104,7 @@ func ReloadFileManager() {
 
 func check(e error) {
 	if e != nil {
-		panic(e)
+		logger.AddErrObj("Something went wrong", e)
+		initilized = false
 	}
 }
