@@ -124,7 +124,12 @@ func (fs *FlagSet) GetStateString() string {
 		result += flag.Name[0] + ": " + fmt.Sprintf("%v", flag.Value) + " | "
 	}
 	// remove last two characters
-	result = result[:len(result)-3]
+	if len(result) > 3 {
+		result = result[:len(result)-3]
+	}
+	if result == "[" {
+		return ""
+	}
 	return result + "]\n"
 }
 

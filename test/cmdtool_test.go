@@ -30,3 +30,47 @@ func TestFlag_Copy(t *testing.T) {
 		t.Errorf("Expected copied flag to not be affected by modifications to original flag, but got %v", copiedFlag)
 	}
 }
+
+func TestFlag_ToString(t *testing.T) {
+	tests := []struct {
+		name       string
+		flag       *cmdtool.Flag
+		wantResult string
+	}{
+		{
+			name: "single letter flag",
+			flag: &cmdtool.Flag{
+				Name:        []string{"f"},
+				Description: "Test flag",
+				Value:       nil,
+			},
+			wantResult: "   -f Test flag",
+		},
+		{
+			name: "multi-letter flag",
+			flag: &cmdtool.Flag{
+				Name:        []string{"flag1", "flag2"},
+				Description: "Test flag",
+				Value:       nil,
+			},
+			wantResult: "   [-f|flag2] Test flag",
+		},
+		{
+			name: "flag with value",
+			flag: &cmdtool.Flag{
+				Name:        []string{"f"},
+				Description: "Test flag",
+				Value:       "test",
+			},
+			wantResult: "   -f Test flag (optional)",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotResult := tt.flag.ToString(); gotResult != tt.wantResult {
+				t.Errorf("Flag.ToString() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}

@@ -5,16 +5,11 @@ import (
 	"os"
 	"path/filepath"
 	"phil1436/GitGitGo-CLI/pkg/cmdtool"
+	"phil1436/GitGitGo-CLI/pkg/compiler"
 	"phil1436/GitGitGo-CLI/pkg/logger"
 	"phil1436/GitGitGo-CLI/pkg/subcommands"
 	"phil1436/GitGitGo-CLI/pkg/utils"
-	"strings"
 )
-
-const VERSION = "0.0.1"
-
-var sbCmds []*cmdtool.Subcommand
-var globalFlags *cmdtool.FlagSet = cmdtool.NewFlagSet()
 
 func main() {
 
@@ -25,18 +20,17 @@ func main() {
 		return
 	}
 	utils.REPONAME = filepath.Base(s)
-
 	InitCommands()
+	compiler.ExecuteCommand(os.Args, true)
 
-	ExecuteCommand(os.Args, true)
 	logger.Log("")
 	logger.Log("by Philipp B.")
 	logger.LogSL("Have a nice day :)")
 }
 
 func InitCommands() {
-	sbCmds = append(sbCmds, cmdtool.NewSubcommand([]string{"version", "-v"}, "Get the current version", PrintVersion))
-	sbCmds = append(sbCmds, cmdtool.NewSubcommand([]string{"help", "-h"}, "Help command", globalHelp))
+	compiler.AddSubcommand(cmdtool.NewSubcommand([]string{"version", "-v"}, "Get the current version", compiler.PrintVersion))
+	compiler.AddSubcommand(cmdtool.NewSubcommand([]string{"help", "-h"}, "Help command", compiler.GlobalHelp))
 
 	initCommand := cmdtool.NewSubcommand([]string{"init", "i"}, "Init command", subcommands.Init)
 
@@ -44,7 +38,7 @@ func InitCommands() {
 
 	printCommand := cmdtool.NewSubcommand([]string{"print", "p"}, "Print command", subcommands.Print)
 
-	//shellCommand := cmdtool.NewSubcommand([]string{"shell", "s"}, "Start a GitGitGo shell", subcommands.Print)
+	shellCommand := cmdtool.NewSubcommand([]string{"shell", "s"}, "Start a GitGitGo shell", subcommands.StartShell)
 
 	destinationFlag := &cmdtool.Flag{
 		Name:        []string{"destination", "d"},
@@ -101,10 +95,10 @@ func InitCommands() {
 	printCommand.AddFlag(fileFlagOpt)
 	printCommand.AddFlag(nameFlagPrint)
 
-	sbCmds = append(sbCmds, initCommand)
-	sbCmds = append(sbCmds, addCommand)
-	sbCmds = append(sbCmds, printCommand)
-	//sbCmds = append(sbCmds, shellCommand)
+	compiler.AddSubcommand(initCommand)
+	compiler.AddSubcommand(addCommand)
+	compiler.AddSubcommand(printCommand)
+	compiler.AddSubcommand(shellCommand)
 
 	// global flags
 
@@ -136,102 +130,10 @@ func InitCommands() {
 		Value:       "",
 	}
 
-	globalFlags.AddFlag(quietFlag)
-	globalFlags.AddFlag(ownerFlag)
-	globalFlags.AddFlag(githubnameFlag)
-	globalFlags.AddFlag(fullnameFlag)
-	globalFlags.AddFlag(reponameFlag)
+	compiler.AddGlobalFlag(quietFlag)
+	compiler.AddGlobalFlag(ownerFlag)
+	compiler.AddGlobalFlag(githubnameFlag)
+	compiler.AddGlobalFlag(fullnameFlag)
+	compiler.AddGlobalFlag(reponameFlag)
+
 }
-
-func ExecuteCommand(args []string, ignoreFirstArg bool) {
-	activeSCmd := GetActiveSubcommand(args, ignoreFirstArg)
-
-	if activeSCmd == nil {
-		globalHelp(nil)
-		return
-	}
-	start := 1
-	if ignoreFirstArg {
-		start = 2
-	}
-
-	parsedGloablFlags := globalFlags.Copy()
-	parsedGloablFlags.Parse(args[start:])
-	BeforeRun(parsedGloablFlags)
-
-	if !activeSCmd.Run(os.Args[start:], parsedGloablFlags) {
-		fmt.Println("\nAn Error occured while executing the command '" + activeSCmd.Names[0] + "':")
-		logger.PrintErrors()
-		fmt.Println("\nUse 'gitgitgo help' to get help")
-	}
-}
-
-func BeforeRun(globalFlags *cmdtool.FlagSet) {
-	if globalFlags.GetValue("quiet").(bool) {
-		logger.Quiet()
-	}
-	if globalFlags.GetValue("owner").(string) != "" {
-		utils.OWNER = globalFlags.GetValue("owner").(string)
-	}
-	if globalFlags.GetValue("githubname").(string) != "" {
-		utils.GITHUBNAME = globalFlags.GetValue("githubname").(string)
-	}
-	if globalFlags.GetValue("fullname").(string) != "" {
-		utils.FULLNAME = globalFlags.GetValue("fullname").(string)
-	}
-	if globalFlags.GetValue("reponame").(string) != "" {
-		utils.REPONAME = globalFlags.GetValue("reponame").(string)
-	}
-}
-
-func GetActiveSubcommand(args []string, ignoreFirstArg bool) *cmdtool.Subcommand {
-	// Get the subcommand name
-	first := 0
-
-	if ignoreFirstArg {
-		first = 1
-	}
-
-	if len(args) < (first + 1) {
-		return nil
-	}
-
-	for _, sb := range sbCmds {
-		for _, name := range sb.Names {
-			if strings.EqualFold(name, args[first]) {
-				return sb
-			}
-		}
-	}
-	return nil
-}
-
-func globalHelp(fs *cmdtool.FlagSet) bool {
-	fmt.Println("GitGitGo-CLI - A CLI tool for Git written in Go")
-	fmt.Println("")
-	//fmt.Printf("Usage: %s [command] [flags]\n", os.Args[0])
-	fmt.Println("Usage: gitgitgo [command] [flags]")
-	fmt.Println("")
-	fmt.Println("Commands:")
-	for _, sb := range sbCmds {
-		fmt.Println(sb.ToString())
-	}
-	fmt.Println("")
-	if !globalFlags.IsEmpty() {
-		fmt.Println("Global Flags (Use with every command):")
-		fmt.Println(globalFlags.ToString())
-	}
-	return true
-}
-
-func PrintVersion(fs *cmdtool.FlagSet) bool {
-	fmt.Printf("GitGitGo-CLI version %s\n", VERSION)
-	return true
-}
-
-/* func log(msg string) {
-	if quietly {
-		return
-	}
-	fmt.Println(msg)
-} */
