@@ -1,0 +1,15 @@
+# After we descided to use the ISC license, we can add it to our project
+
+# 3. Step: Add the license to the project
+
+# Set values
+set provider phil1436
+set fullname "John Smith"
+set githubname jsmith123
+set reponame MyFirstGitRepo
+
+# Create the license
+# The -as option is used to specify the name of the file
+add ISC-License -destination MyFirstGitRepo -as LICENSE
+
+# Now run the file with the 'gitgitgo run <path to file>' command

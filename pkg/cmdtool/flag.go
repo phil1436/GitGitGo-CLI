@@ -7,15 +7,18 @@ type Flag struct {
 	BoolFlag    bool
 }
 
-func (f *Flag) Copy() *Flag {
-	result := &Flag{
-		Name:        make([]string, len(f.Name)),
-		Description: f.Description,
-		Value:       f.Value,
-		BoolFlag:    f.BoolFlag,
+func NewFlag(name []string, description string, value interface{}, boolFlag bool) *Flag {
+	return &Flag{
+		Name:        name,
+		Description: description,
+		Value:       value,
+		BoolFlag:    boolFlag,
 	}
-	copy(result.Name, f.Name)
-	return result
+}
+
+func (f *Flag) Copy() *Flag {
+	// make a copy of the flag and return it
+	return NewFlag(f.Name, f.Description, f.Value, f.BoolFlag)
 }
 
 func (f *Flag) ToString() string {

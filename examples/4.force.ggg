@@ -1,0 +1,17 @@
+# After a quick descussion we came to the conclusion that the MIT license would be a better choice for our project.
+# And we also decided that the license should apply to johns company, not to him personally.
+
+# 4. Step: Overwrite the license
+
+# Set values
+set provider phil1436
+set fullname "John Smith"
+set githubname jsmith123
+set reponame MyFirstGitRepo
+
+# Overwrite the license
+# The -force flag is needed to overwrite the existing license
+# The -fullname flag is needed to set the fullname of the license owner
+add MIT-License -destination MyFirstGitRepo -as LICENSE -force -fullname "Smith Corp."
+
+# Now run the file with the 'gitgitgo run <path to file>' command

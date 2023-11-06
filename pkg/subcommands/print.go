@@ -8,11 +8,10 @@ import (
 )
 
 // Add a specified file to your project
-func Print(fs *cmdtool.FlagSet) bool {
+func Print(attValue []interface{}, fs *cmdtool.FlagSet) bool {
 	logger.Log("*** gitgitgo PRINT ***")
 	logger.Log(fs.GetStateString())
-
-	if fs.GetValue("file") == "" {
+	if attValue[0] == nil {
 
 		files := utils.GetAllFiles()
 		if files == nil {
@@ -25,7 +24,26 @@ func Print(fs *cmdtool.FlagSet) bool {
 		return true
 	}
 
-	file := utils.GetFile(fs.GetValue("file").(string))
+	name := attValue[0].(string)
+
+	if utils.IsRepoVarName(name) {
+		fmt.Println("reponame: " + utils.REPONAME)
+		return true
+	}
+	if utils.IsFullNameVarName(name) {
+		fmt.Println("fullname: " + utils.FULLNAME)
+		return true
+	}
+	if utils.IsGithubNameVarName(name) {
+		fmt.Println("githubname: " + utils.GITHUBNAME)
+		return true
+	}
+	if utils.IsProviderVarName(name) {
+		fmt.Println("provider: " + utils.PROVIDER)
+		return true
+	}
+
+	file := utils.GetFile(name)
 	if file == nil {
 		fmt.Println("File '" + fs.GetValue("file").(string) + "' not found")
 		return false

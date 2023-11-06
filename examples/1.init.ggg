@@ -1,0 +1,19 @@
+# This is a GitGitGo Script.
+# A '#' at the start of a line indicates a comment
+
+# In the next few steps we will create a new local repo with all the standard files so we can start working on our project.
+
+# 1. Step: create a new local repo with all the standard files
+
+# Set values
+set provider phil1436
+set fullname "John Smith"
+set githubname jsmith123
+set reponame MyFirstGitRepo
+
+# -destination is the directory to create the new repo in
+# -ignore is a comma separated list of files to ignore 
+# Here we will ignore the LICENSE file to add it later
+init -destination MyFirstGitRepo -ignore LICENSE
+
+# Now run the file with the 'gitgitgo run <path to file>' command

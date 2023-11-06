@@ -6,7 +6,7 @@ import (
 	"phil1436/GitGitGo-CLI/pkg/shell"
 )
 
-func StartShell(fs *cmdtool.FlagSet) bool {
+func StartShell(attValue []interface{}, fs *cmdtool.FlagSet) bool {
 	logger.Log("*** gitgitgo SHELL ***")
 	logger.Log(fs.GetStateString())
 

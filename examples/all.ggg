@@ -1,0 +1,4 @@
+run examples/1.init.ggg
+run examples/2.print.ggg
+run examples/3.add.ggg
+run examples/4.force.ggg

@@ -1,0 +1,17 @@
+# Our repository looks good, but we will need a License for our project...
+# Lets see which licenses are available
+
+# 2. Step: Lets print out all files so we can see what we can add
+
+# But first set the provider
+set provider phil1436
+
+# This command will print out all files that are available
+# The -name option will only print out the name of the file
+print -name
+
+# The ISC-License is a good license for our project
+# Lets take a closer look at it ...
+print ISC-License
+
+# Now run the file with the 'gitgitgo run <path to file>' command

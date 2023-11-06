@@ -1,5 +1,9 @@
 package cmdtool
 
+import (
+	"strings"
+)
+
 // class Subcommand
 //
 // This class is used to create a subcommand for the CLI tool.
@@ -11,11 +15,13 @@ package cmdtool
 type Subcommand struct {
 	Names       []string
 	Description string
-	Handler     func(fs *FlagSet) bool
+	Handler     func(attValue []interface{}, fs *FlagSet) bool
 	FlagSet     *FlagSet
+	Attribute   []*Attribute
 }
 
-func NewSubcommand(names []string, description string, handler func(fs *FlagSet) bool) *Subcommand {
+// Creates a new subcommand
+func NewSubcommand(names []string, description string, handler func(attValue []interface{}, fs *FlagSet) bool) *Subcommand {
 	return &Subcommand{
 		Names:       names,
 		Description: description,
@@ -24,33 +30,69 @@ func NewSubcommand(names []string, description string, handler func(fs *FlagSet)
 	}
 }
 
+// Adds a flag to the subcommand
 func (s *Subcommand) AddFlag(flag *Flag) {
 	s.FlagSet.AddFlag(flag)
 }
 
+// Adds an attribute to the subcommand
+func (s *Subcommand) AddAttribute(name string, description string) {
+	s.Attribute = append(s.Attribute, NewAttribute(name, description))
+}
+
+// Run runs the subcommand
 func (s *Subcommand) Run(args []string, fs *FlagSet) bool {
-	s.FlagSet.Parse(args)
-	if !s.FlagSet.IsFullFilled() {
+	myFlagSet := s.FlagSet.Copy()
+	myFlagSet.Parse(args)
+	if !myFlagSet.IsFullFilled() {
 		return false
 	}
-	x := s.FlagSet
+	x := myFlagSet
 	if fs != nil {
 		fs.Parse(args)
 		if !fs.IsFullFilled() {
 			return false
 		}
-		x = s.FlagSet.Concat(fs)
+		x = x.Concat(fs)
 	}
-	return s.Handler(x)
+	if s.Attribute != nil {
+		return s.Handler(s.ParseAttributes(args), x)
+	}
+	return s.Handler(nil, x)
 }
 
+func (s *Subcommand) ParseAttributes(args []string) []interface{} {
+	if s.Attribute == nil {
+		return make([]interface{}, 0)
+	}
+	result := make([]interface{}, len(s.Attribute))
+	flagDetected := false
+	for i := range s.Attribute {
+		if len(args) <= i || flagDetected {
+			result[i] = nil
+			continue
+		}
+		if strings.HasPrefix(args[i], "-") {
+			result[i] = nil
+			flagDetected = true
+			continue
+		}
+		if strings.HasPrefix(args[i], "\\-") {
+			result[i] = args[i][1:]
+			continue
+		}
+		result[i] = args[i]
+	}
+	return result
+}
+
+// ToString returns a string representation of the subcommand
 func (s *Subcommand) ToString() string {
 	result := ""
 	if len(s.Names) == 1 {
 		result += s.Names[0]
 	} else {
 		result += "[" + s.Names[0]
-		//iterate over the rest of the names
 		i := 1
 		for i < len(s.Names) {
 			result += "|" + s.Names[i]
@@ -59,10 +101,22 @@ func (s *Subcommand) ToString() string {
 		result += "]"
 	}
 
-	if s.FlagSet.IsEmpty() {
-		return result + ": " + s.Description + "\n"
+	if s.Attribute != nil {
+		for _, att := range s.Attribute {
+			result += " <" + att.Name + ">"
+		}
 	}
-	result = result + " [flags]: " + s.Description
+
+	if s.FlagSet.IsEmpty() {
+		result = result + ": " + s.Description
+	} else {
+		result = result + " <flags>: " + s.Description
+	}
+	if s.Attribute != nil {
+		for _, att := range s.Attribute {
+			result += "\n   <" + att.Name + ">: " + att.Description
+		}
+	}
 	result += "\n" + s.FlagSet.ToString()
 	return result
 }

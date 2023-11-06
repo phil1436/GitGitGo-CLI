@@ -8,18 +8,16 @@ import (
 	"strings"
 )
 
-const VERSION = "0.0.1"
-
 var sbCmds []*cmdtool.Subcommand
 var globalFlags *cmdtool.FlagSet = cmdtool.NewFlagSet()
 
 // ExecuteCommand executes the command
-func ExecuteCommand(args []string, ignoreFirstArg bool) {
+func ExecuteCommand(args []string, ignoreFirstArg bool) bool {
 	activeSCmd := GetActiveSubcommand(args, ignoreFirstArg)
 
 	if activeSCmd == nil {
-		GlobalHelp(nil)
-		return
+		//GlobalHelp(nil, nil)
+		return false
 	}
 	start := 1
 	if ignoreFirstArg {
@@ -34,7 +32,30 @@ func ExecuteCommand(args []string, ignoreFirstArg bool) {
 		fmt.Println("\nAn Error occured while executing the command '" + activeSCmd.Names[0] + "':")
 		logger.PrintErrors()
 		fmt.Println("\nUse 'gitgitgo help' to get help")
+		return false
 	}
+	return true
+}
+
+func ExecuteLine(line string) bool {
+	args := strings.Fields(line)
+	for i, arg := range args {
+		if strings.HasPrefix(arg, "\"") {
+			args[i] = strings.TrimPrefix(arg, "\"")
+			for j := i + 1; j < len(args); j++ {
+				if strings.HasSuffix(args[j], "\"") {
+					args[i] += " " + strings.TrimSuffix(args[j], "\"")
+					args = append(args[:j], args[j+1:]...)
+					break
+				} else {
+					args[i] += " " + args[j]
+					args = append(args[:j], args[j+1:]...)
+					j--
+				}
+			}
+		}
+	}
+	return ExecuteCommand(args, strings.EqualFold(args[0], "gitgitgo"))
 }
 
 // BeforeRun is called before the subcommand is executed
@@ -42,8 +63,13 @@ func BeforeRun(globalFlags *cmdtool.FlagSet) {
 	if globalFlags.GetValue("quiet").(bool) {
 		logger.Quiet()
 	}
-	if globalFlags.GetValue("owner").(string) != "" {
-		utils.OWNER = globalFlags.GetValue("owner").(string)
+	if globalFlags.GetValue("provider").(string) != "" {
+		newprovider := globalFlags.GetValue("provider").(string)
+		if newprovider != utils.PROVIDER {
+			utils.PROVIDER = newprovider
+			fmt.Println("Changed provider to '" + newprovider + "'")
+			utils.ReloadFileManager()
+		}
 	}
 	if globalFlags.GetValue("githubname").(string) != "" {
 		utils.GITHUBNAME = globalFlags.GetValue("githubname").(string)
@@ -66,6 +92,9 @@ func GetActiveSubcommand(args []string, ignoreFirstArg bool) *cmdtool.Subcommand
 	}
 
 	if len(args) < (first + 1) {
+		fmt.Println("No command given")
+		fmt.Println("")
+		fmt.Println("Use 'gitgitgo help' to get help")
 		return nil
 	}
 
@@ -76,12 +105,34 @@ func GetActiveSubcommand(args []string, ignoreFirstArg bool) *cmdtool.Subcommand
 			}
 		}
 	}
+	fmt.Println("Unknown command '" + args[first] + "'\n")
+	fmt.Println("Use 'gitgitgo help' to get help")
+
 	return nil
 }
 
+func Help(attValue []interface{}, fs *cmdtool.FlagSet) bool {
+	if attValue[0] == nil {
+		GlobalHelp(nil, nil)
+		return true
+	}
+	for _, sb := range sbCmds {
+		for _, name := range sb.Names {
+			if name == attValue[0].(string) {
+				fmt.Println(name + " HELP:\n")
+				fmt.Println(sb.ToString())
+				return true
+			}
+		}
+	}
+	logger.AddError("Unknown command '" + attValue[0].(string) + "'\n")
+	return false
+}
+
 // GlobalHelp prints the global help
-func GlobalHelp(fs *cmdtool.FlagSet) bool {
-	fmt.Println("GitGitGo-CLI - A CLI tool for Git written in Go")
+// Set fs to nil!
+func GlobalHelp(attValue []interface{}, fs *cmdtool.FlagSet) bool {
+	fmt.Println("GitGitGo-CLI - a CLI tool to help you manage your git repositories. ")
 	fmt.Println("")
 	//fmt.Printf("Usage: %s [command] [flags]\n", os.Args[0])
 	fmt.Println("Usage: gitgitgo [command] [flags]")
@@ -99,8 +150,8 @@ func GlobalHelp(fs *cmdtool.FlagSet) bool {
 }
 
 // PrintVersion prints the current version
-func PrintVersion(fs *cmdtool.FlagSet) bool {
-	fmt.Printf("GitGitGo-CLI version %s\n", VERSION)
+func PrintVersion(attValue []interface{}, fs *cmdtool.FlagSet) bool {
+	fmt.Printf("GitGitGo-CLI version %s\n", utils.VERSION)
 	return true
 }
 

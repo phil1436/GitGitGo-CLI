@@ -39,7 +39,7 @@ func Init() bool {
 	}
 
 	initilized = true
-	resp, err := http.Get("https://api.github.com/users/" + OWNER + "/repos")
+	resp, err := http.Get("https://api.github.com/users/" + PROVIDER + "/repos")
 
 	check(err)
 
@@ -56,12 +56,12 @@ func Init() bool {
 	for _, repo := range repos {
 		name := repo["name"].(string)
 		if strings.ToLower(name) == ".gitgitgo" {
-			fileUrl = "https://raw.githubusercontent.com/" + OWNER + "/.gitgitgo/" + repo["default_branch"].(string) + "/files.json"
+			fileUrl = "https://raw.githubusercontent.com/" + PROVIDER + "/.gitgitgo/" + repo["default_branch"].(string) + "/files.json"
 			break
 		}
 	}
 	if fileUrl == "" {
-		logger.AddError("No .gitgitgo repo found for owner '" + OWNER + "'")
+		logger.AddError("No .gitgitgo repo found for provider '" + PROVIDER + "'")
 		return false
 	}
 
@@ -95,6 +95,11 @@ func Init() bool {
 
 	}
 	return true
+}
+
+func ReloadFileManager() {
+	initilized = false
+	Init()
 }
 
 func check(e error) {

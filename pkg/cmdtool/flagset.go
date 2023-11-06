@@ -140,7 +140,10 @@ func (fs *FlagSet) IsEmpty() bool {
 
 func (fs *FlagSet) Copy() *FlagSet {
 	newFlags := make([]*Flag, len(fs.Flags))
-	copy(newFlags, fs.Flags)
+	for i := range fs.Flags {
+		newFlags[i] = fs.Flags[i].Copy()
+	}
+
 	return &FlagSet{
 		Flags: newFlags,
 	}
