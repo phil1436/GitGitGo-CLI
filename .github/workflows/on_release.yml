@@ -6,24 +6,47 @@ on:
             - '*'
 
 jobs:
-    build:
+    upload-release:
         runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                os: [ubuntu-latest, windows-latest]
+        needs: [build-linux, build-windows]
+
         steps:
             - uses: actions/checkout@v2
-
-            - name: Set up Go
-              uses: actions/setup-go@v4
+            - name: create release
+              id: create_release
+              uses: actions/create-release@master
+              env:
+                  GITHUB_TOKEN: ${{ secrets.TOKEN }}
               with:
-                  go-version: 1.21
+                  tag_name: ${{ github.ref }}
+                  release_name: Release ${{ github.ref }}
+                  draft: false
+                  prerelease: false
+            - name: download artifacts
+              uses: actions/download-artifact@v1
+              with:
+                  name: uploads
 
-            - name: Test
-              run: go test -v ./test
-
-            - name: Build for ${{ matrix.os }}
-              run: go build -v -o dist/gitgitgo${{ matrix.os == 'windows-latest' && '.exe' }} .
+            #- name: upload linux
+            #  id: upload-linux
+            #  uses: actions/upload-release-asset@v1.0.1
+            #  env:
+            #      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            #  with:
+            #      upload_url: ${{ steps.create_release.outputs.upload_url }}
+            #      asset_path: ./uploads/linux.zip
+            #      asset_name: linux.zip
+            #      asset_content_type: application/zip
+            #- name: upload windows
+            #  id: upload-windows
+            #  uses: actions/upload-release-asset@v1.0.1
+            #  env:
+            #      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            #  with:
+            #      upload_url: ${{ steps.create_release.outputs.upload_url }}
+            #      asset_path: ./uploads/windows.zip
+            #      asset_name: windows.zip
+            #      asset_content_type: application/zip
 
             - name: Get Changelog Entry
               id: changelog_reader
@@ -37,7 +60,47 @@ jobs:
               uses: ncipollo/release-action@v1
               with:
                   artifacts: |
-                      dist/gitgitgo.exe
-                      dist/gitgitgo
+                      uploads/gitgitgo.exe
+                      uploads/gitgitgo
                   token: ${{ secrets.GITHUB_TOKEN }}
                   body: ${{ steps.changelog_reader.outputs.changes }}
+
+    build-linux:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Set up Go
+              uses: actions/setup-go@v4
+              with:
+                  go-version: 1.21
+
+            - name: Build for linux
+              run: go build -v -o dist/gitgitgo
+
+            - name: upload linux artifact
+              uses: actions/upload-artifact@v1
+              with:
+                  name: uploads
+                  path: dist/gitgitgo
+
+    build-windows:
+        runs-on: windows-latest
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Set up Go
+              uses: actions/setup-go@v4
+              with:
+                  go-version: 1.21
+
+            - name: Build for linux
+              run: go build -v -o dist/gitgitgo.exe
+
+            - name: upload linux artifact
+              uses: actions/upload-artifact@v1
+              with:
+                  name: uploads
+                  path: dist/gitgitgo.exe
