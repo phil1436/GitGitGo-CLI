@@ -12,16 +12,6 @@ jobs:
 
         steps:
             - uses: actions/checkout@v2
-            - name: create release
-              id: create_release
-              uses: actions/create-release@master
-              env:
-                  GITHUB_TOKEN: ${{ secrets.TOKEN }}
-              with:
-                  tag_name: ${{ github.ref }}
-                  release_name: Release ${{ github.ref }}
-                  draft: false
-                  prerelease: false
             - name: download artifacts
               uses: actions/download-artifact@v1
               with:
@@ -96,7 +86,7 @@ jobs:
               with:
                   go-version: 1.21
 
-            - name: Build for linux
+            - name: Build for windows
               run: go build -v -o dist/gitgitgo.exe
 
             - name: upload linux artifact
