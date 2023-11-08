@@ -36,7 +36,7 @@ func InitCommands() {
 
 	printCommand := cmdtool.NewSubcommand([]string{"print", "p"}, "Print command", subcommands.Print)
 
-	printCommand.AddAttribute("filename | valuename", "The file or value to print (If no file is given all files will be printed)")
+	printCommand.AddAttribute("filename | parametername", "The file or value to print (If no file is given all files will be printed)")
 
 	shellCommand := cmdtool.NewSubcommand([]string{"shell", "s"}, "Start a GitGitGo shell", subcommands.StartShell)
 
@@ -44,7 +44,7 @@ func InitCommands() {
 
 	runCommand.AddAttribute("filename", "The file to run")
 
-	setCommand := cmdtool.NewSubcommand([]string{"set"}, "Set a value", func(attValue []interface{}, fs *cmdtool.FlagSet) bool {
+	setCommand := cmdtool.NewSubcommand([]string{"set"}, "Set a parameter", func(attValue []interface{}, fs *cmdtool.FlagSet) bool {
 
 		if attValue[0] == nil {
 			logger.AddError("No name specified")
