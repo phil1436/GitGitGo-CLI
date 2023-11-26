@@ -95,10 +95,12 @@ Prints the help page for the given command. If no command is given, the help pag
 #### `init`
 
 ```bash
-gitgitgo init <flags>
+gitgitgo init <keywords> <flags>
 ```
 
 Initializes a new git repository with a predefined structure and files.
+
+You can add a comma separated list of keywords to the command. The keywords will be used to filter the templates in the `.gitgitgo` repository. Only templates that contain all keywords will be used. If no keywords are given, all templates that have the property `oninit` set to `true` will be used.
 
 Flags:
 
@@ -179,17 +181,44 @@ This flags can be used with every command:
 
 The provider is the name of the user or organisation that owns the `.gitgitgo` repository.
 
+> You can use `p` as a shortcut for `provider`.
+
 #### `githubname`
 
 The github name is the name that will be used in the file templates. The value will be used for the `${GITHUBNAME}` placeholder in the templates.
+
+> You can use `gname` or `gn` as a shortcut for `githubname`.
 
 #### `fullname`
 
 The full name is the name that will be used in the file templates. The value will be used for the `${FULLNAME}` placeholder in the templates.
 
+> You can use `fname` or `fn` as a shortcut for `fullname`.
+
 #### `reponame`
 
 The repo name is the name that will be used in the file templates. The value will be used for the `${REPONAME}` placeholder in the templates. The default is the name of the current working directory.
+
+> You can use `rname` or `rn` as a shortcut for `reponame`.
+
+---
+
+## Config file
+
+GitGitGo-CLI can use a config file to store the current provider and the current parameters. The config file is located in the home directory of the current user. The name of the file is **`.gitgitgoc`**. The file should has the following structure:
+
+```
+# This is a comment
+
+# Set the provider
+provider=phil1436
+
+# Set your full name
+fullname=Philipp B.
+
+# Set your github name
+githubname=phil1436
+```
 
 ---
 
@@ -207,12 +236,13 @@ View and run the files in the [examples](examples/) directory to get a better un
 
 ## [Release Notes](https://github.com/phil1436/GitGitGo-CLI/blob/main/CHANGELOG.md)
 
-### [v0.0.1](https://github.com/phil1436/GitGitGo-CLI/tree/0.0.1)
+### [v0.0.2](https://github.com/phil1436/GitGitGo-CLI/tree/0.0.2)
 
--   _Initial release_
+-   Bug fixes
+-   Description and Keywords support for `print` command
+-   `.gitgitgoc` file support
+-   keyword support for `init` command
 
 ---
 
 by [Philipp B.](https://github.com/phil1436)
-
-<!-- git push --tags -->

@@ -22,13 +22,30 @@ func Init(attValue []interface{}, fs *cmdtool.FlagSet) bool {
 		return false
 	}
 
+	withKeywords := attValue[0] != nil
+	keywords := []string{""}
+	if withKeywords {
+		keywords = strings.Split(attValue[0].(string), ",")
+	}
+
 	ignore := strings.Split(fs.GetValue("ignore").(string), ",")
 
 	gitIgnore := utils.GetFile(".gitignore")
 
 	for _, file := range files {
-		if !file.OnInit || file.Name == ".gitignore" {
+		// ignore .gitignore
+		if file.Name == ".gitignore" {
 			continue
+		}
+		if withKeywords {
+			if !file.ContainsKeywordArr(keywords) {
+				continue
+			}
+
+		} else {
+			if !file.OnInit {
+				continue
+			}
 		}
 		if utils.ArrContains(ignore, file.Name) {
 			logger.Log("Ignore file: " + file.Name)

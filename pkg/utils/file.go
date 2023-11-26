@@ -10,29 +10,39 @@ import (
 )
 
 type File struct {
-	Name   string
-	Ignore bool
-	OnInit bool
-	Text   string
+	Name        string
+	Ignore      bool
+	OnInit      bool
+	Text        string
+	Description string
+	Keywords    []string
 }
 
-func NewFile(name string, text string, ignore bool, onInit bool) *File {
+func NewFile(name string, text string, ignore bool, onInit bool, description string, keywords string) *File {
 
 	return &File{
-		Name:   name,
-		Ignore: ignore,
-		OnInit: onInit,
-		Text:   text,
+		Name:        name,
+		Ignore:      ignore,
+		OnInit:      onInit,
+		Text:        text,
+		Description: description,
+		Keywords:    strings.Split(keywords, ","),
 	}
 }
 
 func NewEmptyFile(name string) *File {
 	return &File{
-		Name:   name,
-		Ignore: false,
-		OnInit: false,
-		Text:   "",
+		Name:        name,
+		Ignore:      false,
+		OnInit:      false,
+		Text:        "",
+		Description: "",
+		Keywords:    []string{},
 	}
+}
+
+func (t *File) SetKeywords(keyword string) {
+	t.Keywords = strings.Split(keyword, ",")
 }
 
 func (t *File) ParseText(githubName string, fullname string, repoName string) string {
@@ -45,6 +55,24 @@ func (t *File) ParseText(githubName string, fullname string, repoName string) st
 	text = strings.ReplaceAll(text, "${REPONAME}", repoName)
 	return text
 
+}
+
+func (t *File) ContainsKeyword(keyword string) bool {
+	for _, key := range t.Keywords {
+		if strings.EqualFold(key, keyword) {
+			return true
+		}
+	}
+	return false
+}
+
+func (t *File) ContainsKeywordArr(keywords []string) bool {
+	for _, key := range keywords {
+		if t.ContainsKeyword(key) {
+			return true
+		}
+	}
+	return false
 }
 
 func (t *File) Save(basePath string, githubName string, fullname string, repoName string, as string, force bool, dryrun bool) bool {
@@ -116,6 +144,16 @@ func (t *File) ToString(onlyNames bool) string {
 	result := "File: " + t.Name + "\n"
 	result += "Ignore: " + fmt.Sprintf("%v", t.Ignore) + "\n"
 	result += "OnInit: " + fmt.Sprintf("%v", t.OnInit) + "\n"
+	if t.Description != "" {
+		result += "Description: " + t.Description + "\n"
+	}
+	if len(t.Keywords) > 0 {
+		result += "Keywords: "
+		for _, keyword := range t.Keywords {
+			result += keyword + ", "
+		}
+		result += "\n"
+	}
 	result += "Text: \n" + t.Text + "\n"
 	return result
 }

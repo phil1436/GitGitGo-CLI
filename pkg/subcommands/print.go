@@ -45,7 +45,7 @@ func Print(attValue []interface{}, fs *cmdtool.FlagSet) bool {
 
 	file := utils.GetFile(name)
 	if file == nil {
-		fmt.Println("File '" + fs.GetValue("file").(string) + "' not found")
+		logger.AddError("File '" + name + "' not found")
 		return false
 	}
 

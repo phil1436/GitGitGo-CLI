@@ -2,6 +2,7 @@ package compiler
 
 import (
 	"fmt"
+	"os"
 	"phil1436/GitGitGo-CLI/pkg/cmdtool"
 	"phil1436/GitGitGo-CLI/pkg/logger"
 	"phil1436/GitGitGo-CLI/pkg/utils"
@@ -64,7 +65,13 @@ func BeforeRun(globalFlags *cmdtool.FlagSet) {
 	if globalFlags.GetValue("dev").(bool) {
 		// run in dev mode
 		ExecuteLine("run setvalues.ggg")
+		err := os.Chdir("dev")
+		if err != nil {
+			logger.AddErrObj("Error while changing directory", err)
+		}
 	}
+
+	HandleGitGitGoConfigFile()
 
 	if globalFlags.GetValue("quiet").(bool) {
 		logger.Quiet()
@@ -88,6 +95,46 @@ func BeforeRun(globalFlags *cmdtool.FlagSet) {
 	}
 	if globalFlags.GetValue("reponame").(string) != "" {
 		utils.REPONAME = globalFlags.GetValue("reponame").(string)
+	}
+
+}
+
+func HandleGitGitGoConfigFile() {
+	// check if file exists
+	text, err := os.ReadFile(".gitgitgoc")
+	if err != nil {
+		return
+	}
+	lines := strings.Split(string(text), "\n")
+	for _, line := range lines {
+		if line == "" {
+			continue
+		}
+		if strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		keyval := strings.Split(line, "=")
+		if len(keyval) != 2 {
+			logger.AddError("Invalid line in .gitgitgoc file: '" + line + "'")
+			return
+		}
+
+		key := strings.TrimSpace(keyval[0])
+		val := strings.TrimSpace(keyval[1])
+
+		if utils.IsProviderVarName(key) {
+			utils.PROVIDER = val
+		}
+		if utils.IsGithubNameVarName(key) {
+			utils.GITHUBNAME = val
+		}
+		if utils.IsFullNameVarName(key) {
+			utils.FULLNAME = val
+		}
+		if utils.IsRepoVarName(key) {
+			utils.REPONAME = val
+		}
 	}
 
 }

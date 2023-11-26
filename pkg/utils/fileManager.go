@@ -90,6 +90,12 @@ func Init() bool {
 		if file["oninit"] != nil {
 			fileObj.OnInit = file["oninit"].(bool)
 		}
+		if file["description"] != nil {
+			fileObj.Description = file["description"].(string)
+		}
+		if file["keywords"] != nil {
+			fileObj.SetKeywords(file["keywords"].(string))
+		}
 
 		AddFile(fileObj)
 

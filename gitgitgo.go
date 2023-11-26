@@ -19,7 +19,7 @@ func main() {
 
 	logger.Log("")
 	logger.Log("by Philipp B.")
-	logger.LogSL("Have a nice day :)")
+	logger.Log("Have a nice day :)")
 }
 
 func InitCommands() {
@@ -29,6 +29,8 @@ func InitCommands() {
 	compiler.AddSubcommand(helpCommad)
 
 	initCommand := cmdtool.NewSubcommand([]string{"init", "i"}, "Init command", subcommands.Init)
+
+	initCommand.AddAttribute("keywords", "A comma separated list of keywords to search for")
 
 	addCommand := cmdtool.NewSubcommand([]string{"add", "a"}, "Add command", subcommands.Add)
 
@@ -77,8 +79,8 @@ func InitCommands() {
 		logger.Log("Set " + name + " to " + value)
 		return true
 	})
-	setCommand.AddAttribute("name", "The name of the value to set")
-	setCommand.AddAttribute("value", "The value to set")
+	setCommand.AddAttribute("name", "The name of the parameter to set")
+	setCommand.AddAttribute("value", "The value to set the parameter to")
 
 	destinationFlag := &cmdtool.Flag{
 		Name:        []string{"destination", "d"},
