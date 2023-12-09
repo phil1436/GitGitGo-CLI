@@ -18,8 +18,8 @@ type File struct {
 	Keywords    []string
 }
 
+// Create a new file
 func NewFile(name string, text string, ignore bool, onInit bool, description string, keywords string) *File {
-
 	return &File{
 		Name:        name,
 		Ignore:      ignore,
@@ -30,6 +30,7 @@ func NewFile(name string, text string, ignore bool, onInit bool, description str
 	}
 }
 
+// Returns a empty file
 func NewEmptyFile(name string) *File {
 	return &File{
 		Name:        name,
@@ -41,10 +42,12 @@ func NewEmptyFile(name string) *File {
 	}
 }
 
+// Set keywords from a comma seperated string
 func (t *File) SetKeywords(keyword string) {
 	t.Keywords = strings.Split(keyword, ",")
 }
 
+// Replace Placeholder in the text
 func (t *File) ParseText(githubName string, fullname string, repoName string) string {
 	text := t.Text
 	text = strings.ReplaceAll(text, "${YEAR}", fmt.Sprintf("%d", time.Now().Year()))
@@ -57,6 +60,7 @@ func (t *File) ParseText(githubName string, fullname string, repoName string) st
 
 }
 
+// ContainsKeyword checks if the file contains the keyword
 func (t *File) ContainsKeyword(keyword string) bool {
 	for _, key := range t.Keywords {
 		if strings.EqualFold(key, keyword) {
@@ -66,6 +70,7 @@ func (t *File) ContainsKeyword(keyword string) bool {
 	return false
 }
 
+// ContainsKeywordArr checks if the file contains one of the keywords
 func (t *File) ContainsKeywordArr(keywords []string) bool {
 	for _, key := range keywords {
 		if t.ContainsKeyword(key) {
@@ -75,6 +80,7 @@ func (t *File) ContainsKeywordArr(keywords []string) bool {
 	return false
 }
 
+// Save the file
 func (t *File) Save(basePath string, githubName string, fullname string, repoName string, as string, force bool, dryrun bool) bool {
 	name := t.Name
 	if as != "" {
@@ -116,6 +122,33 @@ func (t *File) Save(basePath string, githubName string, fullname string, repoNam
 	return true
 }
 
+func (t *File) AddToGitIgnore() {
+	if !t.Ignore {
+		return
+	}
+	// check if .gitignore exists in the same directory
+	text, err := os.ReadFile(".gitignore")
+	if err != nil {
+		return
+	}
+	// check if file is already in .gitignore
+	if strings.Contains(string(text), t.Name) {
+		return
+	}
+	// add file to .gitignore
+	f, err := os.OpenFile(".gitignore", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		logger.AddErrObj("Error while opening .gitignore", err)
+		return
+	}
+	defer f.Close()
+	if _, err := f.WriteString(t.Name + "\n"); err != nil {
+		logger.AddErrObj("Error while writing to .gitignore", err)
+		return
+	}
+}
+
+// ImportTextArr imports a text array
 func (t *File) ImportTextArr(arr []string) {
 	if arr == nil {
 		return
@@ -126,6 +159,8 @@ func (t *File) ImportTextArr(arr []string) {
 	}
 	t.Text = newText
 }
+
+// ImportTextArrI imports a text array from an interface array
 func (t *File) ImportTextArrI(arr []interface{}) {
 	if arr == nil {
 		return
@@ -137,6 +172,7 @@ func (t *File) ImportTextArrI(arr []interface{}) {
 	t.Text = newText
 }
 
+// ToString returns a string representation of the file
 func (t *File) ToString(onlyNames bool) string {
 	if onlyNames {
 		return t.Name

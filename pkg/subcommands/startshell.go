@@ -7,7 +7,7 @@ import (
 )
 
 func StartShell(attValue []interface{}, fs *cmdtool.FlagSet) bool {
-	logger.Log("*** gitgitgo SHELL ***")
+	logger.Log("*** GitGitGo SHELL ***")
 	logger.Log(fs.GetStateString())
 
 	return shell.Start()

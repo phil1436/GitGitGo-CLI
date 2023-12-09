@@ -26,11 +26,14 @@
 ---
 
 -   [Concept](#concept)
+    -   [.gitgitgo](#gitgitgo)
+    -   [Provider](#provider)
 -   [Installation](#installation)
 -   [Usage](#usage)
     -   [Commands](#commands)
     -   [Global flags](#global-flags)
     -   [Parameters](#parameters)
+-   [Config file](#config-file)
 -   [Examples](#examples)
 -   [Bugs](#bugs)
 -   [Release Notes](#release-notes)
@@ -135,6 +138,7 @@ If a [parameter](#parameters) name is given, prints the value of the parameter. 
 Flags:
 
 -   `[-name|-n]`: Prints the name of the files instead of the content.
+-   `[-parameter|-pm]`: If set all parameters and their values will be printed.
 
 #### `shell`
 
@@ -159,7 +163,7 @@ Flags:
 #### `set`
 
 ```bash
-gitgitgo set <name> <value>
+gitgitgo set <parameter-name> <value>
 ```
 
 Sets a [parameter](#parameters) to the given value.
@@ -205,9 +209,13 @@ The repo name is the name that will be used in the file templates. The value wil
 
 ## Config file
 
-GitGitGo-CLI can use a config file to store the current provider and the current parameters. The config file is located in the home directory of the current user. The name of the file is **`.gitgitgoc`**. The file should has the following structure:
+GitGitGo-CLI can use a config file to store the current provider and the current parameters. The config file is located in the home directory of the current user. The name of the file is **`.gitgitgoc`** and will be parsed before every command.
+
+The file should has the following structure:
 
 ```
+# =
+# The line above is the seperator. It is used to seperate the different sections of the file. You can change it to : or - if you want.
 # This is a comment
 
 # Set the provider
@@ -219,6 +227,12 @@ fullname=Philipp B.
 # Set your github name
 githubname=phil1436
 ```
+
+### Global config file
+
+GitGitGo-CLI can use a global config file to store the current provider and the current parameters. It should be located in the same directory as the binary and should be named **`.gitgitgoc`**. The file will be parsed before every command.
+
+> You can use `.gggc` as a shortcut for `.gitgitgoc`.
 
 ---
 
@@ -236,12 +250,17 @@ View and run the files in the [examples](examples/) directory to get a better un
 
 ## [Release Notes](https://github.com/phil1436/GitGitGo-CLI/blob/main/CHANGELOG.md)
 
-### [v0.0.2](https://github.com/phil1436/GitGitGo-CLI/tree/0.0.2)
+### [v0.1.0](https://github.com/phil1436/GitGitGo-CLI/tree/0.1.0)
 
 -   Bug fixes
--   Description and Keywords support for `print` command
--   `.gitgitgoc` file support
--   keyword support for `init` command
+-   added `-parameter` flag for the `print` command
+-   `.gitgitgoc` file can now be named `.gggc` as well
+-   seperator support in `.gitgitgoc` file
+-   Parameter set by default to git name
+-   Global config file support
+-   Shell command `mdkir` added
+-   Shell command `reload` added
+-   Command `update` added
 
 ---
 

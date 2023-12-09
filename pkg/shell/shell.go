@@ -12,6 +12,7 @@ import (
 
 var running bool = false
 
+// Start the shell
 func Start() bool {
 	if running {
 		logger.AddError("Shell is already running")
@@ -22,6 +23,7 @@ func Start() bool {
 	return MainLoop()
 }
 
+// The main loop of the shell
 func MainLoop() bool {
 	for running {
 
@@ -44,14 +46,15 @@ func MainLoop() bool {
 	return true
 }
 
+// Stop the shell
 func Stop(attValue []interface{}, fs *cmdtool.FlagSet) bool {
 	running = false
 	return true
 }
 
+// Add the shell commands to the compiler
 func AddShellCommands() {
-
-	compiler.AddSubcommand(cmdtool.NewSubcommand([]string{"exit"}, "Exit the shell", Stop))
+	compiler.AddSubcommand(cmdtool.NewSubcommand([]string{"exit", "ex"}, "Exit the shell", Stop))
 	compiler.AddSubcommand(cmdtool.NewSubcommand([]string{"pwd"}, "Print the working directory", func(attValue []interface{}, fs *cmdtool.FlagSet) bool {
 		dir, err := os.Getwd()
 		if err != nil {
@@ -64,6 +67,13 @@ func AddShellCommands() {
 	compiler.AddSubcommand(cmdtool.NewSubcommand([]string{"clear"}, "Clear the terminal", func(attValue []interface{}, fs *cmdtool.FlagSet) bool {
 		fmt.Print("\033[H\033[2J")
 		return true
+	}))
+	compiler.AddSubcommand(cmdtool.NewSubcommand([]string{"reload"}, "Reload the file templates", func(attValue []interface{}, fs *cmdtool.FlagSet) bool {
+		if utils.ReloadFileManager() {
+			logger.Log("Reload successful")
+			return true
+		}
+		return false
 	}))
 	cdCommand := cmdtool.NewSubcommand([]string{"cd"}, "Change the working directory", func(attValue []interface{}, fs *cmdtool.FlagSet) bool {
 		if attValue == nil {
@@ -80,6 +90,22 @@ func AddShellCommands() {
 	})
 	cdCommand.AddAttribute("path", "The path to change to")
 	compiler.AddSubcommand(cdCommand)
+
+	mkdirCommand := cmdtool.NewSubcommand([]string{"mkdir"}, "Create a new folder", func(attValue []interface{}, fs *cmdtool.FlagSet) bool {
+		if attValue == nil {
+			logger.AddError("No directory specified")
+			return false
+		}
+		err := os.MkdirAll(attValue[0].(string), 0777)
+		if err != nil {
+			logger.AddErrObj("Error while creating directory", err)
+			return false
+		}
+		logger.Log("Directory " + attValue[0].(string) + " created")
+		return true
+	})
+	mkdirCommand.AddAttribute("dir", "The directory to create")
+	compiler.AddSubcommand(mkdirCommand)
 
 	lsCommand := cmdtool.NewSubcommand([]string{"ls"}, "List the content in the directory", func(attValue []interface{}, fs *cmdtool.FlagSet) bool {
 
@@ -122,6 +148,7 @@ func AddShellCommands() {
 
 }
 
+// cd to the given directory
 func ChangeToDir(dir string) bool {
 	err := os.Chdir(dir)
 	if err != nil {

@@ -31,7 +31,7 @@ func Run(attValue []interface{}, fs *cmdtool.FlagSet) bool {
 	lines := strings.Split(string(fileContent), "\n")
 
 	for _, line := range lines {
-		if strings.HasPrefix(line, "#") || strings.TrimSpace(line) == "" {
+		if strings.HasPrefix(strings.TrimSpace(line), "#") || strings.TrimSpace(line) == "" {
 			continue
 		}
 		if !compiler.ExecuteLine(line) {

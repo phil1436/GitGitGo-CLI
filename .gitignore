@@ -7,3 +7,5 @@ test_workflows
 dev
 .gitgitgoc
 pushtags.bat
+runDevShell.bat
+bugs.md

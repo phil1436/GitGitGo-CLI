@@ -37,6 +37,7 @@ func Init(attValue []interface{}, fs *cmdtool.FlagSet) bool {
 		if file.Name == ".gitignore" {
 			continue
 		}
+
 		if withKeywords {
 			if !file.ContainsKeywordArr(keywords) {
 				continue
@@ -47,6 +48,7 @@ func Init(attValue []interface{}, fs *cmdtool.FlagSet) bool {
 				continue
 			}
 		}
+
 		if utils.ArrContains(ignore, file.Name) {
 			logger.Log("Ignore file: " + file.Name)
 			continue

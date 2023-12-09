@@ -9,8 +9,17 @@ import (
 
 // Add a specified file to your project
 func Print(attValue []interface{}, fs *cmdtool.FlagSet) bool {
-	logger.Log("*** gitgitgo PRINT ***")
+	logger.Log("*** GitGitGo PRINT ***")
 	logger.Log(fs.GetStateString())
+
+	if fs.GetValue("parameter").(bool) {
+		fmt.Println("reponame: " + utils.REPONAME)
+		fmt.Println("fullname: " + utils.FULLNAME)
+		fmt.Println("githubname: " + utils.GITHUBNAME)
+		fmt.Println("provider: " + utils.PROVIDER)
+		return true
+	}
+
 	if attValue[0] == nil {
 
 		files := utils.GetAllFiles()

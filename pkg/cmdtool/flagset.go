@@ -33,17 +33,6 @@ func (fs *FlagSet) GetValue(name string) interface{} {
 	return nil
 }
 
-/* func (fs *FlagSet) GetStringValue(name string) interface{} {
-	for _, flag := range fs.Flags {
-		for _, n := range flag.Name {
-			if n == name {
-				return flag.Value.(string)
-			}
-		}
-	}
-	return nil
-} */
-
 // Check if a flag with the given name is defined
 func (fs *FlagSet) IsDefined(name string) bool {
 	for _, flag := range fs.Flags {
@@ -69,6 +58,10 @@ func (fs *FlagSet) Parse(args []string) {
 						if flag.BoolFlag {
 							flag.Value = true
 						} else {
+							if i+1 >= len(args) {
+								logger.AddError("Flag '-" + flag.Name[0] + "' requires a value")
+								return
+							}
 							flag.Value = args[i+1]
 							i++
 						}
@@ -138,6 +131,7 @@ func (fs *FlagSet) IsEmpty() bool {
 	return len(fs.Flags) == 0
 }
 
+// Makes a copy of the FlagSet and returns it
 func (fs *FlagSet) Copy() *FlagSet {
 	newFlags := make([]*Flag, len(fs.Flags))
 	for i := range fs.Flags {

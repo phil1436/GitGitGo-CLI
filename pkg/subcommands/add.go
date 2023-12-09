@@ -36,5 +36,8 @@ func Add(attValue []interface{}, fs *cmdtool.FlagSet) bool {
 		reponame = filepath.Base(destination)
 	}
 
+	// Add to gitignore
+	file.AddToGitIgnore()
+
 	return file.Save(destination, utils.GITHUBNAME, utils.FULLNAME, reponame, fs.GetValue("as").(string), fs.GetValue("force").(bool), fs.GetValue("dryrun").(bool))
 }

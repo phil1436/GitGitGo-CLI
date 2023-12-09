@@ -15,6 +15,7 @@ func SetRepoName() {
 	REPONAME = filepath.Base(s)
 }
 
+// Check if a string array contains a string
 func ArrContains(s []string, e string) bool {
 	for _, a := range s {
 		if a == e {

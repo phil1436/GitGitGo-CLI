@@ -1,13 +1,41 @@
 package utils
 
-import "strings"
-
-const VERSION = "0.0.2"
+import (
+	"phil1436/GitGitGo-CLI/pkg/logger"
+	"strings"
+)
 
 var PROVIDER = ""
 var GITHUBNAME = ""
 var FULLNAME = ""
 var REPONAME = ""
+
+var BINARY = ""
+var HOME = ""
+
+// Set to the provider and reload the file manager with the new provider
+func SetProvider(newProvider string) bool {
+	if newProvider == "" {
+		logger.AddError("Empty provider")
+		return false
+	}
+	if newProvider == PROVIDER {
+		return true
+	}
+
+	oldProvider := PROVIDER
+	PROVIDER = newProvider
+	if !ReloadFileManager() {
+		if newProvider != oldProvider {
+			logger.AddError("Provider '" + newProvider + "' not found! Changed back to '" + oldProvider + "'")
+		} else {
+			logger.AddError("Provider '" + newProvider + "' not found!")
+		}
+		PROVIDER = oldProvider
+		return false
+	}
+	return true
+}
 
 func IsProviderVarName(name string) bool {
 	return strings.EqualFold(name, "provider") || strings.EqualFold(name, "p")

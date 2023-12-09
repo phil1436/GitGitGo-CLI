@@ -11,6 +11,7 @@ import (
 var initilized = false
 var files = make(map[string]*File)
 
+// Get a file by name if it does not exist return nil
 func GetFile(fileName string) *File {
 	if !Init() {
 		return nil
@@ -18,6 +19,7 @@ func GetFile(fileName string) *File {
 	return files[fileName]
 }
 
+// Get all files
 func GetAllFiles() []*File {
 	if !Init() {
 		return nil
@@ -29,10 +31,12 @@ func GetAllFiles() []*File {
 	return filesArr
 }
 
+// Add a file to the file manager
 func AddFile(file *File) {
 	files[file.Name] = file
 }
 
+// Initialize the file manager
 func Init() bool {
 	if initilized {
 		return true
@@ -41,16 +45,16 @@ func Init() bool {
 	initilized = true
 	resp, err := http.Get("https://api.github.com/users/" + PROVIDER + "/repos")
 
-	check(err)
+	Check(err)
 
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
-	check(err)
+	Check(err)
 
 	var repos []map[string]interface{}
 	err = json.Unmarshal(body, &repos)
-	check(err)
+	Check(err)
 
 	fileUrl := ""
 	for _, repo := range repos {
@@ -66,16 +70,16 @@ func Init() bool {
 	}
 
 	resp, err = http.Get(fileUrl)
-	check(err)
+	Check(err)
 
 	defer resp.Body.Close()
 
 	body, err = io.ReadAll(resp.Body)
-	check(err)
+	Check(err)
 
 	var content map[string]interface{}
 	err = json.Unmarshal(body, &content)
-	check(err)
+	Check(err)
 
 	files := content["files"].([]interface{})
 
@@ -103,12 +107,14 @@ func Init() bool {
 	return true
 }
 
-func ReloadFileManager() {
+// Reload the file manager
+func ReloadFileManager() bool {
 	initilized = false
-	Init()
+	return Init()
 }
 
-func check(e error) {
+// Check if there is an error and log it
+func Check(e error) {
 	if e != nil {
 		logger.AddErrObj("Something went wrong", e)
 		initilized = false

@@ -1,5 +1,6 @@
 package cmdtool
 
+// This represents a flag in the command line
 type Flag struct {
 	Name        []string
 	Description string
@@ -7,6 +8,7 @@ type Flag struct {
 	BoolFlag    bool
 }
 
+// Creates a new flag
 func NewFlag(name []string, description string, value interface{}, boolFlag bool) *Flag {
 	return &Flag{
 		Name:        name,
@@ -16,11 +18,12 @@ func NewFlag(name []string, description string, value interface{}, boolFlag bool
 	}
 }
 
+// makes a copy of the flag and returns it
 func (f *Flag) Copy() *Flag {
-	// make a copy of the flag and return it
 	return NewFlag(f.Name, f.Description, f.Value, f.BoolFlag)
 }
 
+// ToString returns a string representation of the flag
 func (f *Flag) ToString() string {
 	result := "   "
 	if len(f.Name) == 1 {

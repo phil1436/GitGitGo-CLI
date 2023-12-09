@@ -28,8 +28,8 @@ func ExecuteCommand(args []string, ignoreFirstArg bool) bool {
 	parsedGloablFlags := globalFlags.Copy()
 	parsedGloablFlags.Parse(args[start:])
 	BeforeRun(parsedGloablFlags)
-
-	if !activeSCmd.Run(args[start:], parsedGloablFlags) {
+	runSuccess := activeSCmd.Run(args[start:], parsedGloablFlags)
+	if !runSuccess || logger.IsError() {
 		fmt.Println("\nAn Error occured while executing the command '" + activeSCmd.Names[0] + "':")
 		logger.PrintErrors()
 		fmt.Println("\nUse 'gitgitgo help' to get help")
@@ -61,17 +61,15 @@ func ExecuteLine(line string) bool {
 
 // BeforeRun is called before the subcommand is executed
 func BeforeRun(globalFlags *cmdtool.FlagSet) {
+	HandleGitGitGoConfigFile(".")
 
 	if globalFlags.GetValue("dev").(bool) {
 		// run in dev mode
-		ExecuteLine("run setvalues.ggg")
 		err := os.Chdir("dev")
 		if err != nil {
 			logger.AddErrObj("Error while changing directory", err)
 		}
 	}
-
-	HandleGitGitGoConfigFile()
 
 	if globalFlags.GetValue("quiet").(bool) {
 		logger.Quiet()
@@ -81,10 +79,8 @@ func BeforeRun(globalFlags *cmdtool.FlagSet) {
 
 	if globalFlags.GetValue("provider").(string) != "" {
 		newprovider := globalFlags.GetValue("provider").(string)
-		if newprovider != utils.PROVIDER {
-			utils.PROVIDER = newprovider
+		if utils.SetProvider(newprovider) {
 			logger.Log("Changed provider to '" + newprovider + "'")
-			utils.ReloadFileManager()
 		}
 	}
 	if globalFlags.GetValue("githubname").(string) != "" {
@@ -99,22 +95,46 @@ func BeforeRun(globalFlags *cmdtool.FlagSet) {
 
 }
 
-func HandleGitGitGoConfigFile() {
+func HandleGitGitGoConfigFile(directory string) {
 	// check if file exists
-	text, err := os.ReadFile(".gitgitgoc")
+
+	text, err := os.ReadFile(directory + "/.gitgitgo")
 	if err != nil {
-		return
+		text, err = os.ReadFile(directory + "/.gitgitgoc")
+		if err != nil {
+			return
+		}
 	}
+
 	lines := strings.Split(string(text), "\n")
-	for _, line := range lines {
-		if line == "" {
+	seperator := "="
+	for i, line := range lines {
+
+		// get seperator
+		if i == 0 && strings.HasPrefix(strings.TrimSpace(line), "#") {
+			if strings.TrimSpace(line) == "#:" || strings.TrimSpace(line) == "# :" {
+				seperator = ":"
+				continue
+			}
+			if strings.TrimSpace(line) == "#-" || strings.TrimSpace(line) == "# -" {
+				seperator = "-"
+				continue
+			}
+			if strings.TrimSpace(line) == "#=" || strings.TrimSpace(line) == "# =" {
+				seperator = "="
+				continue
+			}
+		}
+
+		// ignore empty lines and comments
+		if strings.TrimSpace(line) == "" {
 			continue
 		}
-		if strings.HasPrefix(line, "#") {
+		if strings.HasPrefix(strings.TrimSpace(line), "#") {
 			continue
 		}
 
-		keyval := strings.Split(line, "=")
+		keyval := strings.Split(line, seperator)
 		if len(keyval) != 2 {
 			logger.AddError("Invalid line in .gitgitgoc file: '" + line + "'")
 			return
@@ -124,7 +144,7 @@ func HandleGitGitGoConfigFile() {
 		val := strings.TrimSpace(keyval[1])
 
 		if utils.IsProviderVarName(key) {
-			utils.PROVIDER = val
+			utils.SetProvider(val)
 		}
 		if utils.IsGithubNameVarName(key) {
 			utils.GITHUBNAME = val
@@ -203,12 +223,6 @@ func GlobalHelp(attValue []interface{}, fs *cmdtool.FlagSet) bool {
 		fmt.Println("Global Flags (Use with every command):")
 		fmt.Println(globalFlags.ToString())
 	}
-	return true
-}
-
-// PrintVersion prints the current version
-func PrintVersion(attValue []interface{}, fs *cmdtool.FlagSet) bool {
-	fmt.Printf("GitGitGo-CLI version %s\n", utils.VERSION)
 	return true
 }
 

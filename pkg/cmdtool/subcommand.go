@@ -4,14 +4,7 @@ import (
 	"strings"
 )
 
-// class Subcommand
-//
-// This class is used to create a subcommand for the CLI tool.
-// It contains the following fields:
-// - Name: the name of the subcommand
-// - Description: a description of the subcommand
-// - FlagSet: a FlagSet object that contains the flags for the subcommand
-// - Handler: a function that is called when the subcommand is executed
+// This represents a subcommand for example: npm <subcommand>
 type Subcommand struct {
 	Names       []string
 	Description string
@@ -61,6 +54,7 @@ func (s *Subcommand) Run(args []string, fs *FlagSet) bool {
 	return s.Handler(nil, x)
 }
 
+// Parses the attributes of the subcommand and returns there values
 func (s *Subcommand) ParseAttributes(args []string) []interface{} {
 	if s.Attribute == nil {
 		return make([]interface{}, 0)
